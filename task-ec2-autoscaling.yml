@@ -1,0 +1,169 @@
+Parameters:
+    VPC:
+      Description: Get the VPC
+      Type: AWS::EC2::VPC::Id
+    AmiId:
+      Description: AMI for Instance (default is latest AmaLinux2)
+      Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+      Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+    KeyName:
+      Type: AWS::EC2::KeyPair::KeyName
+      Description: "Name of an existing SSH Keypair to access the instance"
+    IPAddress:
+      Type: String
+      Description: "This must be a valid IP address."
+      AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+      ConstraintDescription: "must be a valid IP address of the form x.x.x.x/x"
+    AppSubnets: 
+      Description: "Comma-delimited list of three CIDR blocks"
+      Type: "List<AWS::EC2::Subnet::Id>"
+      Default: "172.31.0.0/20, 172.31.80.0/20, 172.31.32.0/20"
+    
+    
+Resources:
+  AppASGLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties: 
+      LaunchTemplateData: 
+        KeyName: !Ref KeyName
+        InstanceType: "t2.micro"
+        ImageId: !Ref AmiId
+        SecurityGroupIds: 
+          - Fn::GetAtt: [ AppSG, GroupId ]
+        UserData:
+          Fn::Base64: !Sub |
+          <script>
+            cfn-init.exe -v --stack ${AWS::StackName} --resource SG --region ${AWS::Region}
+            cfn-signal.exe -e 0 --stack ${AWS::StackName} --resource SG --region ${AWS::Region}
+          </script>
+            #!/bin/bash -xe
+            yum -y update
+            yum install httpd
+
+            cat <<EOF > /var/www/html/index.html
+
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <title>Garrett's Webpage</title>
+            </head>
+            <body>
+
+            <h1>Welcome to Garrett's Sweet Webpage</h1>
+            <p>This is a paragraph.</p>
+
+            </body>
+            </html>
+
+            EOF   
+
+            systemctl start httpd
+
+  AppSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+        GroupDescription: Enable SSH access via port 22 IPv4 
+        SecurityGroupIngress: 
+        - Description: 'Allow SSH IPv4 IN'
+          IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: !Ref IPAddress
+
+  SG: 
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn:
+      - AppSNSTopic
+    Properties:
+      AvailabilityZones:
+        Fn::GetAZs: ''
+      LaunchTemplate:
+        LaunchTemplateId: !Ref AppASGLaunchTemplate
+        Version: "1"
+      MaxSize: "3"
+      MinSize: "1"
+      HealthCheckGracePeriod: 60
+      HealthCheckType: "ELB"
+      DesiredCapacity: "1"
+      NotificationConfigurations:
+        - TopicARN: !Ref AppSNSTopic
+          NotificationTypes:
+          - autoscaling:EC2_INSTANCE_LAUNCH
+          - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
+          - autoscaling:EC2_INSTANCE_TERMINATE
+          - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
+          - autoscaling:TEST_NOTIFICATION
+    CreationPolicy:
+      ResourceSignal:
+        Count: '3'
+        Timeout: PT3M
+    UpdatePolicy:
+      AutoScalingScheduledAction:
+        IgnoreUnmodifiedGroupSizeProperties: 'true'
+      AutoScalingRollingUpdate:
+        MinInstancesInService: '1'
+        MaxBatchSize: '2'
+        PauseTime: PT1M
+        WaitOnResourceSignals: 'false'
+
+  AppSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: "john.adedigba@gmail.com"
+          Protocol: email
+      TopicName: "SampleTopic"
+
+  ALBSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Inbound HTTP
+      SecurityGroupIngress: 
+        - Description: 'Allow HTTP IPv4 IN'
+          IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: '0.0.0.0/0'
+
+  AppALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      IpAddressType: 'ipv4'
+      Scheme: 'internet-facing'
+      SecurityGroups: [!GetAtt ALBSG.GroupId, !GetAtt AppSG.GroupId]
+      Subnets:
+        - !Select [0, !Ref AppSubnets]
+        - !Select [1, !Ref AppSubnets]
+        - !Select [2, !Ref AppSubnets]
+      Type: 'application'
+      
+  AppALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref AppALBTG
+      LoadBalancerArn: !Ref AppALB
+      Port: 80
+      Protocol: HTTP
+  AppALBTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /index.html
+      HealthCheckTimeoutSeconds: 5
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId: !Ref VPC      
+     
+Outputs:
+  WebsiteURL:
+    Description: Application URL
+    Value:
+      Fn::Join:
+      - ''
+      - - http://
+        - Fn::GetAtt:
+          - AppALB
+          - DNSName
