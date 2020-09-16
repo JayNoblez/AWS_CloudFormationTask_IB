@@ -29,13 +29,10 @@ Resources:
         InstanceType: "t2.micro"
         ImageId: !Ref AmiId
         SecurityGroupIds: 
-          - Fn::GetAtt: [ AppSG, GroupId ]
+          - !GetAtt ALBSG.GroupId
+          - !GetAtt AppSG.GroupId
         UserData:
           Fn::Base64: !Sub |
-          <script>
-            cfn-init.exe -v --stack ${AWS::StackName} --resource SG --region ${AWS::Region}
-            cfn-signal.exe -e 0 --stack ${AWS::StackName} --resource SG --region ${AWS::Region}
-          </script>
             #!/bin/bash -xe
             yum -y update
             yum install httpd
@@ -45,12 +42,12 @@ Resources:
             <!DOCTYPE html>
             <html>
             <head>
-            <title>Garrett's Webpage</title>
+            <title>Invincible Brands</title>
             </head>
             <body>
 
-            <h1>Welcome to Garrett's Sweet Webpage</h1>
-            <p>This is a paragraph.</p>
+            <h1>Welcome to Our Homepage. Thank you for Visiting</h1>
+            <p>Brands! Brands! Brands! </p>
 
             </body>
             </html>
@@ -93,19 +90,7 @@ Resources:
           - autoscaling:EC2_INSTANCE_TERMINATE
           - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
           - autoscaling:TEST_NOTIFICATION
-    CreationPolicy:
-      ResourceSignal:
-        Count: '3'
-        Timeout: PT3M
-    UpdatePolicy:
-      AutoScalingScheduledAction:
-        IgnoreUnmodifiedGroupSizeProperties: 'true'
-      AutoScalingRollingUpdate:
-        MinInstancesInService: '1'
-        MaxBatchSize: '2'
-        PauseTime: PT1M
-        WaitOnResourceSignals: 'false'
-
+    
   AppSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
