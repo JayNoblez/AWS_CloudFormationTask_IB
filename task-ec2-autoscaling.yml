@@ -1,25 +1,47 @@
 Parameters:
-    VPC:
-      Description: Get the VPC
-      Type: AWS::EC2::VPC::Id
-    AmiId:
-      Description: AMI for Instance (default is latest AmaLinux2)
-      Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
-      Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
-    KeyName:
-      Type: AWS::EC2::KeyPair::KeyName
-      Description: "Name of an existing SSH Keypair to access the instance"
-    IPAddress:
-      Type: String
-      Description: "This must be a valid IP address."
-      AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-      ConstraintDescription: "must be a valid IP address of the form x.x.x.x/x"
-    AppSubnets: 
-      Description: "Comma-delimited list of three CIDR blocks"
-      Type: "List<AWS::EC2::Subnet::Id>"
-      Default: "172.31.0.0/20, 172.31.80.0/20, 172.31.32.0/20"
-    
-    
+  VPC:
+    Description: Gets the Current VPC
+    Type: AWS::EC2::VPC::Id
+  AmiId:
+    Description: AMI Image ID for Instance (default is latest AmaLinux2)
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+  AppSubnets: 
+    Description: "List of Subnets for use in AutoScaling Group"
+    Type: "List<AWS::EC2::Subnet::Id>" 
+  AppSecurityGroupList: 
+    Description: "List of Security Groups for use in AutoScaling Group"
+    Type: List<AWS::EC2::SecurityGroup::Id> 
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: "An Existing EC2 Keypair to access created instances via SSH"
+  IPAddress:
+    Type: String
+    Description: "This must be a valid IP address. Default is 0.0.0.0/0. It is recommended to use a /32 address"
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: "must be a valid IP address of the form x.x.x.x/x"
+  ScalingNotificationTopic:
+    Type: String
+    Description: Name of SNS topic to notify on EC2 Autoscaling changes
+    Default: MySampleTopic      
+  SNSSubscriptionEndpoint:
+    Description: The endpoint that recieves notifications from the Amazon SNS Topic. Endpoint value can be a URL or ARN
+    Type: String
+    Default: john.adedigba@gmail.com
+  SNSSubscriptionProtocol:
+    Type: String
+    Description: The subscription's protocol
+    AllowedValues:
+    - http
+    - https
+    - email
+    - email-json
+    - sms
+    - sqs
+    - application
+    - lambda
+    Default: email
+       
 Resources:
   AppASGLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
@@ -28,44 +50,14 @@ Resources:
         KeyName: !Ref KeyName
         InstanceType: "t2.micro"
         ImageId: !Ref AmiId
-        SecurityGroupIds: 
-          - !GetAtt ALBSG.GroupId
-          - !GetAtt AppSG.GroupId
+        SecurityGroupIds: !Ref AppSecurityGroupList
         UserData:
           Fn::Base64: !Sub |
-            #!/bin/bash -xe
-            yum -y update
-            yum install httpd
-
-            cat <<EOF > /var/www/html/index.html
-
-            <!DOCTYPE html>
-            <html>
-            <head>
-            <title>Invincible Brands</title>
-            </head>
-            <body>
-
-            <h1>Welcome to Our Homepage. Thank you for Visiting</h1>
-            <p>Brands! Brands! Brands! </p>
-
-            </body>
-            </html>
-
-            EOF   
-
+            #!/bin/bash
+            yum update -y
+            yum install httpd -y
             systemctl start httpd
-
-  AppSG:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-        GroupDescription: Enable SSH access via port 22 IPv4 
-        SecurityGroupIngress: 
-        - Description: 'Allow SSH IPv4 IN'
-          IpProtocol: tcp
-          FromPort: '22'
-          ToPort: '22'
-          CidrIp: !Ref IPAddress
+            systemctl restart httpd
 
   SG: 
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -80,6 +72,8 @@ Resources:
       MaxSize: "3"
       MinSize: "1"
       HealthCheckGracePeriod: 60
+      TargetGroupARNs: 
+        - !Ref AppALBTG
       HealthCheckType: "ELB"
       DesiredCapacity: "1"
       NotificationConfigurations:
@@ -95,27 +89,16 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       Subscription:
-        - Endpoint: "john.adedigba@gmail.com"
-          Protocol: email
-      TopicName: "SampleTopic"
-
-  ALBSG:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      GroupDescription: Inbound HTTP
-      SecurityGroupIngress: 
-        - Description: 'Allow HTTP IPv4 IN'
-          IpProtocol: tcp
-          FromPort: '80'
-          ToPort: '80'
-          CidrIp: '0.0.0.0/0'
+        - Endpoint: !Ref SNSSubscriptionEndpoint
+          Protocol: !Ref SNSSubscriptionProtocol
+      TopicName: !Ref ScalingNotificationTopic
 
   AppALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       IpAddressType: 'ipv4'
       Scheme: 'internet-facing'
-      SecurityGroups: [!GetAtt ALBSG.GroupId, !GetAtt AppSG.GroupId]
+      SecurityGroups: !Ref AppSecurityGroupList
       Subnets:
         - !Select [0, !Ref AppSubnets]
         - !Select [1, !Ref AppSubnets]
@@ -131,6 +114,7 @@ Resources:
       LoadBalancerArn: !Ref AppALB
       Port: 80
       Protocol: HTTP
+
   AppALBTG:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -141,9 +125,9 @@ Resources:
       Protocol: HTTP
       UnhealthyThresholdCount: 5
       VpcId: !Ref VPC      
-     
+   
 Outputs:
-  WebsiteURL:
+  WebsiteURL: 
     Description: Application URL
     Value:
       Fn::Join:
