@@ -1,8 +1,10 @@
-# CF_Task
+# Cloud Formation Task
 
-This task create a basic EC2 Auto Scaling template with Cloud Formation. 
+This task creates a basic EC2 Auto Scaling template with Cloud Formation. 
 
-Parameters for defaults like AMI-ID, AppSubnet, ASGSecurityGroupList, etc
+Question 1.
+a. Create a Cloud Formation template that accomodates parameters for defaults like AMI-ID, AppSubnet, ASGSecurityGroupList, etc
+
 b. AutoScaling Configuration Parameters:
 - "ScalingCreateTimeOut",
 - "ScalingUpdateTimeOut",
@@ -19,9 +21,12 @@ b. AutoScaling Configuration Parameters:
 - "MinInstancesInService",
 - "TerminatedInstances",
 - "ScalingMax",
+
 c. “NFSLocation” Parameter:
 - Default:“nfs.example.com:/data”
+
 d. “AppSubnet” Parameter
+
 e. “ASGSecurityGroupList” Parameter
 
 
