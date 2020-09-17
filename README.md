@@ -41,7 +41,7 @@ e. “ASGSecurityGroupList” Parameter
 Question 2: 
 ---
 
-To accommodate huge spikes of traffic, for example - thousands of users online within a couple of minutes. What recommendations can I proffer for the Autoscaling Group to serve as little 50x errors as possible when scaling aggressively?
+### To accommodate huge spikes of traffic, for example - thousands of users online within a couple of minutes. What recommendations can I proffer for the Autoscaling Group to serve as little 50x errors as possible when scaling aggressively?
 
 **Answer:**  Mostly, 50x errors associated with the Autoscaling Group configurations are usually a result of insufficient capacity, the ASG not scaling fast enough to meet demand. The load balancer, EC2 instances, and Autoscaling work together to allow applications scale in the most efficient way.
 
@@ -56,7 +56,7 @@ c)	Target Tracking scaling policies: A predefined metric like ALBRequestCountPer
 Question 3.
 ---
 
-Define and describe a method in detail to use a Redis Cluster via ElastiCache as central PHP Session storage for the AutoScalingGroup above.
+### Define and describe a method in detail to use a Redis Cluster via ElastiCache as central PHP Session storage for the AutoScalingGroup above.
 
 https://aws.amazon.com/getting-started/hands-on/building-fast-session-caching-with-amazon-elasticache-for-redis/2/
 
