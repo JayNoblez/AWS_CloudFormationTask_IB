@@ -53,10 +53,10 @@ c)	Target Tracking scaling policies: A predefined metric like ALBRequestCountPer
 
 
 
-Question 3. 
+Question 3.
+---
 
 Define and describe a method in detail to use a Redis Cluster via ElastiCache as central PHP Session storage for the AutoScalingGroup above.
----
 
 https://aws.amazon.com/getting-started/hands-on/building-fast-session-caching-with-amazon-elasticache-for-redis/2/
 
