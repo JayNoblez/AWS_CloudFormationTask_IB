@@ -35,7 +35,8 @@ d. “AppSubnet” Parameter
 e. “ASGSecurityGroupList” Parameter
 
 
-
+**Answer**:
+Code can be reference in task-ec2-autoscaling.yml
 
 
 Question 2: 
