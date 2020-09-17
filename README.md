@@ -36,7 +36,7 @@ e. “ASGSecurityGroupList” Parameter
 
 
 **Answer**:
-Code can be referenced in task-ec2-autoscaling.yml
+Code can be referenced in *task-ec2-autoscaling.yml*. Can be tested at *https://console.aws.amazon.com/cloudformation/designer/home?region=us-east-1*
 
 
 Question 2: 
