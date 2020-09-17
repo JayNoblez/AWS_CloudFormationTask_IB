@@ -10,7 +10,7 @@ Parameters:
     Description: "List of Subnets for use in AutoScaling Group"
     Type: "List<AWS::EC2::Subnet::Id>" 
   AppSecurityGroupList: 
-    Description: "List of Security Groups for use in AutoScaling Group"
+    Description: "List of Security Groups for use in AutoScaling Group. Pick at least 3 existing subnets"
     Type: List<AWS::EC2::SecurityGroup::Id> 
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
@@ -40,7 +40,7 @@ Parameters:
     - sqs
     - application
     - lambda
-    Default: email
+    Default: emails
        
 Resources:
   AppASGLaunchTemplate:
@@ -119,7 +119,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 30
-      HealthCheckPath: /index.html
+      HealthCheckPath: /index.php
       HealthCheckTimeoutSeconds: 5
       Port: 80
       Protocol: HTTP
