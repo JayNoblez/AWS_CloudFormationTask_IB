@@ -39,11 +39,11 @@ e. “ASGSecurityGroupList” Parameter
 
 
 Question 2: 
-
-To accommodate huge spikes of traffic, for example - thousands of users online within a couple of minutes. What recommendations can I proffer for the Autoscaling Group to serve as little 50x errors as possible when scaling aggressively?
 ---
 
-Mostly, 50x errors associated with the Autoscaling Group configurations are usually a result of insufficient capacity, the ASG not scaling fast enough to meet demand. The load balancer, EC2 instances, and Autoscaling work together to allow applications scale in the most efficient way.
+To accommodate huge spikes of traffic, for example - thousands of users online within a couple of minutes. What recommendations can I proffer for the Autoscaling Group to serve as little 50x errors as possible when scaling aggressively?
+
+**Answer:**  Mostly, 50x errors associated with the Autoscaling Group configurations are usually a result of insufficient capacity, the ASG not scaling fast enough to meet demand. The load balancer, EC2 instances, and Autoscaling work together to allow applications scale in the most efficient way.
 
 a)	The first recommendation would be to monitor metrics from the ELB, as well as from the Load balancers e.g. real time health check fails, request counts when there is a spike. This would inform the Auto Scaling Group Configurations, such as tweaking values like cooldown, HealthCheckGracePeriod etc.
 
