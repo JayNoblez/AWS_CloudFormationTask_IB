@@ -1,5 +1,7 @@
 # Cloud Formation Task
 
+**Answers to Invincible Brands Interview Task questions – AWS Cloud Engineer**
+
 This task creates a basic EC2 Auto Scaling template with Cloud Formation. 
 
 Question 1.
@@ -32,7 +34,7 @@ e. “ASGSecurityGroupList” Parameter
 
 
 
-Answers to Invincible Brands Interview Task questions – AWS Cloud Engineer
+
 
 2. To accommodate huge spikes of traffic, for example - thousands of users online within a couple of minutes. What recommendations can I proffer for the Autoscaling Group to serve as little 50x errors as possible when scaling aggressively?
 
