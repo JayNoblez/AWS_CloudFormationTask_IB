@@ -1,10 +1,12 @@
 # Cloud Formation Task
 
 **Answers to Invincible Brands Interview Task questions – AWS Cloud Engineer**
+---
 
 This task creates a basic EC2 Auto Scaling template with Cloud Formation. 
 
 Question 1.
+---
 
 a. Create a Cloud Formation template that accomodates parameters for defaults like AMI-ID, AppSubnet, ASGSecurityGroupList, etc
 
@@ -37,6 +39,7 @@ e. “ASGSecurityGroupList” Parameter
 
 
 2. To accommodate huge spikes of traffic, for example - thousands of users online within a couple of minutes. What recommendations can I proffer for the Autoscaling Group to serve as little 50x errors as possible when scaling aggressively?
+---
 
 Mostly, 50x errors associated with the Autoscaling Group configurations are usually a result of insufficient capacity, the ASG not scaling fast enough to meet demand. The load balancer, EC2 instances, and Autoscaling work together to allow applications scale in the most efficient way.
 
@@ -47,6 +50,7 @@ b)	If the load changes/ spikes are predictable – In a case whereby the spikes 
 c)	Target Tracking scaling policies: A predefined metric like ALBRequestCountPerTarget, ASGAverageCPUUtilization, ASGAverageNetworkOut monitored via Amazon CloudWatch and used to determine when to trigger the scaling in or out of the application tier (Auto Scaling Group) can be really helpful to keeping 50x errors to a minimum.
 
 3. Define and describe a method in detail to use a Redis Cluster via ElastiCache as central PHP Session storage for the AutoScalingGroup above.
+---
 
 https://aws.amazon.com/getting-started/hands-on/building-fast-session-caching-with-amazon-elasticache-for-redis/2/
 
