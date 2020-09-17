@@ -48,9 +48,9 @@ Question 2:
 
 a)	The first recommendation would be to monitor metrics from the ELB, as well as from the Load balancers e.g. real time health check fails, request counts when there is a spike. This would inform the Auto Scaling Group Configurations, such as tweaking values like cooldown, HealthCheckGracePeriod etc.
 
-b)	If the load changes/ spikes are predictable – In a case whereby the spikes experienced by the company are traceable to specific or repeated occurrences e.g. a traffic surge on Wednesday, steady through till Friday. Then, a recommendation would be to rely on a scheduled scaling policy. The aggressive scaling out can be preempted proactively such that the application is prepared for the surge by temporarily increasing capacity. In this case, the instances are fully in “running” state when the traffic spike hits. Hence reducing number of possible 50x errors.
+b)	If the load changes/ spikes are predictable – In a case whereby the spikes experienced by the company are traceable to specific or repeated occurrences e.g. a traffic surge on Wednesday, steady through till Friday. Then, a recommendation would be to rely on a **scheduled scaling policy**. The aggressive scaling out can be preempted proactively such that the application is prepared for the surge by temporarily increasing capacity. In this case, the instances are fully in “running” state when the traffic spike hits. Hence reducing number of possible 50x errors.
 
-c)	Target Tracking scaling policies: A predefined metric like ALBRequestCountPerTarget, ASGAverageCPUUtilization, ASGAverageNetworkOut monitored via Amazon CloudWatch and used to determine when to trigger the scaling in or out of the application tier (Auto Scaling Group) can be really helpful to keeping 50x errors to a minimum.
+c)	**Use Target Tracking scaling policies**: A predefined metric like ALBRequestCountPerTarget, ASGAverageCPUUtilization, ASGAverageNetworkOut monitored via Amazon CloudWatch and used to determine when to trigger the scaling in or out of the application tier (Auto Scaling Group) can be really helpful to keeping 50x errors to a minimum.
 
 
 
