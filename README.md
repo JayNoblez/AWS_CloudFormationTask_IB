@@ -3,6 +3,7 @@
 This task creates a basic EC2 Auto Scaling template with Cloud Formation. 
 
 Question 1.
+
 a. Create a Cloud Formation template that accomodates parameters for defaults like AMI-ID, AppSubnet, ASGSecurityGroupList, etc
 
 b. AutoScaling Configuration Parameters:
