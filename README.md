@@ -1,6 +1,6 @@
 # Cloud Formation Task
 
-**Answers to Invincible Brands Interview Task questions – AWS Cloud Engineer**
+** AWS Cloud Engineer Task Questions**
 ---
 
 This task creates a basic EC2 Auto Scaling template with Cloud Formation. 
