@@ -45,7 +45,7 @@ Question 2:
 
 **Answer:**  Mostly, 50x errors associated with the Autoscaling Group configurations are usually a result of insufficient capacity, the ASG not scaling fast enough to meet demand. The load balancer, EC2 instances, and Autoscaling work together to allow applications scale in the most efficient way.
 
-a)	The first recommendation would be to monitor metrics from the ELB, as well as from the Load balancers e.g. real time health check fails, request counts when there is a spike. This would inform the Auto Scaling Group Configurations, such as tweaking values like cooldown, HealthCheckGracePeriod etc.
+a)	The first recommendation would be to monitor cloudwatch metrics, as well as, from the Elastic Load balancers e.g. real time health check fails, request counts when there is a spike. This would inform the Auto Scaling Group Configurations, such as tweaking values like cooldown, HealthCheckGracePeriod etc.
 
 b)	If the load changes/ spikes are predictable – In a case whereby the spikes experienced by the company are traceable to specific or repeated occurrences e.g. a traffic surge on Wednesday, steady through till Friday. Then, a recommendation would be to rely on a **scheduled scaling policy**. The aggressive scaling out can be preempted proactively such that the application is prepared for the surge by temporarily increasing capacity. In this case, the instances are fully in “running” state when the traffic spike hits. Hence reducing number of possible 50x errors.
 
