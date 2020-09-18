@@ -1,6 +1,6 @@
 # Cloud Formation Task
 
-** AWS Cloud Engineer Task Questions**
+**AWS Cloud Engineer Task Questions**
 ---
 
 This task creates a basic EC2 Auto Scaling template with Cloud Formation. 
